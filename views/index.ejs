@@ -13,9 +13,8 @@
         <form action="/create" method="POST">
             <h2 class="heading">Create an account</h2>
 
-            <input required placeholder="Email" type="text" name="email">
+            <input required placeholder="Phone" type="number" name="phone">
             <input required placeholder="Username" type="text" name="username">
-            <input required placeholder="Name" type="text" name="name">
             <input required placeholder="Passsword" type="password" name="password">
 
             <span id="errorMessage"
@@ -33,12 +32,11 @@
             submit.removeAttribute("disabled");
             const url = "/create";
             const data = {
-                email: document.querySelector('input[name="email"]').value,
+                phone: document.querySelector('input[name="phone"]').value,
                 username: document.querySelector('input[name="username"]').value,
-                name: document.querySelector('input[name="name"]').value,
                 password: document.querySelector('input[name="password"]').value
             };
-            if (data.email === "" || data.username === "" || data.name === "" || data.password === "") {
+            if (data.phone === "" || data.username === "" || data.password === "") {
                 submit.setAttribute("disabled");
             }
             event.preventDefault();

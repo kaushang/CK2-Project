@@ -11,7 +11,6 @@ const postModel = require('./models/postModel');
 const mongoose = require('mongoose');
 const { type } = require('os');
 require('dotenv').config();
-
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -26,15 +25,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 
 app.get('/', isLoggedIn, (req, res) => {
-    if (req.user.email) {
+    if (req.user.phone) {
         res.redirect('/home');
     } else {
         res.render('index');
     }
 });
 app.get('/home', isLoggedIn, async (req, res) => {
-    if (req.user.email) {
-        const user = await userModel.findOne({ email: req.user.email });
+    if (req.user.phone) {
+        const user = await userModel.findOne({ phone: req.user.phone });
         const posts = await postModel.find()
             .populate('user', 'username'); // Fetch usernames
         res.render('home', { posts, user });
@@ -43,8 +42,8 @@ app.get('/home', isLoggedIn, async (req, res) => {
     }
 })
 app.post('/create', async (req, res) => {
-    const { email, username, name, password } = req.body;
-    const alreadyCreated = await userModel.findOne({ email });
+    const { phone, username, password } = req.body;
+    const alreadyCreated = await userModel.findOne({ phone });
     const usernameTaken = await userModel.findOne({ username });
     if (alreadyCreated) {
         return res.status(400).json({ message: "User already exists" });
@@ -56,12 +55,11 @@ app.post('/create', async (req, res) => {
         bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(password, salt, async (err, hash) => {
                 await userModel.create({
-                    email,
+                    phone,
                     username,
-                    name,
                     password: hash
                 });
-                let token = jwt.sign({ email }, 'xyz');
+                let token = jwt.sign({ phone }, 'xyz');
                 res.cookie("token", token);
                 return res.status(200).json({ message: "User created" });
             });
@@ -70,7 +68,7 @@ app.post('/create', async (req, res) => {
 });
 
 app.get('/login', isLoggedIn, (req, res) => {
-    if (req.user.email) {
+    if (req.user.phone) {
         res.redirect('/home');
     } else {
         res.render('login');
@@ -78,20 +76,20 @@ app.get('/login', isLoggedIn, (req, res) => {
 });
 
 app.post('/login', isLoggedIn, async (req, res) => {
-    if (req.user.email) {
+    if (req.user.phone) {
         res.redirect('/home');
     } else {
-        const user = await userModel.findOne({ email: req.body.email });
+        const user = await userModel.findOne({ username: req.body.username });
         if (!user) {
             res.status(404).json({ message: "User does not exist" });
         } else {
             bcrypt.compare(req.body.password, user.password, (err, result) => {
                 if (result) {
-                    let token = jwt.sign({ email: user.email }, 'xyz');
+                    let token = jwt.sign({ phone: user.phone }, 'xyz');
                     res.cookie("token", token);
                     res.status(200).json({ message: "Seccuessfully logged in" });
                 } else {
-                    return res.status(400).json({ message: "Wrong email or password" });
+                    return res.status(400).json({ message: "Wrong phone or password" });
                 }
             });
         }
@@ -104,8 +102,8 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/create', isLoggedIn, async (req, res) => {
-    if (req.user.email) {
-        const user = await userModel.findOne({ email: req.user.email }).populate('posts');
+    if (req.user.phone) {
+        const user = await userModel.findOne({ phone: req.user.phone }).populate('posts');
         const post = await postModel.find({ user: user._id });
         res.render('create', { user, post });
     } else {
@@ -114,8 +112,8 @@ app.get('/create', isLoggedIn, async (req, res) => {
 });
 
 app.post('/post', isLoggedIn, async (req, res) => {
-    if (req.user.email) {
-        const user = await userModel.findOne({ email: req.user.email });
+    if (req.user.phone) {
+        const user = await userModel.findOne({ phone: req.user.phone });
         const post = await postModel.create({
             user: user._id,
             content: req.body.content
@@ -129,8 +127,8 @@ app.post('/post', isLoggedIn, async (req, res) => {
 });
 
 app.get('/edit/:id', isLoggedIn, async (req, res) => {
-    if (req.user.email) {
-        const user = await userModel.findOne({ email: req.user.email }).populate('posts');
+    if (req.user.phone) {
+        const user = await userModel.findOne({ phone: req.user.phone }).populate('posts');
         const post = await postModel.findById(req.params.id);
         res.render('edit', { user, post });
     } else {
@@ -139,7 +137,7 @@ app.get('/edit/:id', isLoggedIn, async (req, res) => {
 });
 
 app.post('/update/:id', isLoggedIn, async (req, res) => {
-    if (req.user.email) {
+    if (req.user.phone) {
         await postModel.findOneAndUpdate({ _id: req.params.id }, { content: req.body.content });
         res.redirect("/create");
     } else {
@@ -148,7 +146,7 @@ app.post('/update/:id', isLoggedIn, async (req, res) => {
 });
 
 app.get('/delete/:id', isLoggedIn, async (req, res) => {
-    if (req.user.email) {
+    if (req.user.phone) {
         const post = await postModel.findById(req.params.id);
         await postModel.findByIdAndDelete(req.params.id);
         await userModel.updateOne(
@@ -162,8 +160,8 @@ app.get('/delete/:id', isLoggedIn, async (req, res) => {
 });
 
 app.get("/account", isLoggedIn, async (req, res) => {
-    if (req.user.email) {
-        const user = await userModel.findOne({ email: req.user.email });
+    if (req.user.phone) {
+        const user = await userModel.findOne({ phone: req.user.phone });
         res.render('account', { user });
     } else {
         res.redirect('/login');
@@ -171,8 +169,8 @@ app.get("/account", isLoggedIn, async (req, res) => {
 });
 
 app.post("/updatepassword", isLoggedIn, async (req, res) => {
-    if (req.user.email) {
-        const user = await userModel.findOne({ email: req.user.email });
+    if (req.user.phone) {
+        const user = await userModel.findOne({ phone: req.user.phone });
         bcrypt.compare(req.body.currentPassword, user.password, (err, result) => {
             if (result) {
                 if (req.body.currentPassword === req.body.newPassword) {
@@ -181,7 +179,7 @@ app.post("/updatepassword", isLoggedIn, async (req, res) => {
                 if (req.body.newPassword === req.body.newPasswordAgain) {
                     bcrypt.genSalt(10, (err, salt) => {
                         bcrypt.hash(req.body.newPassword, salt, async (err, hash) => {
-                            await userModel.findOneAndUpdate({ email: req.user.email }, { password: hash });
+                            await userModel.findOneAndUpdate({ phone: req.user.phone }, { password: hash });
                             return res.status(200).json({ message: "Password updated successfully" });
                         });
                     });
@@ -200,12 +198,12 @@ app.post("/updatepassword", isLoggedIn, async (req, res) => {
 });
 
 app.post("/deleteaccount", isLoggedIn, async (req, res) => {
-    if (req.user.email) {
-        const user = await userModel.findOne({ email: req.user.email });
+    if (req.user.phone) {
+        const user = await userModel.findOne({ phone: req.user.phone });
         bcrypt.compare(req.body.currentPassword, user.password, async (err, result) => {
             if (result) {
                 res.cookie("token", "");
-                await userModel.findOneAndDelete({ email: req.user.email });
+                await userModel.findOneAndDelete({ phone: req.user.phone });
                 await postModel.deleteMany({ user: user._id });
                 res.status(200).json({ message: "Account deleted" });
             }
@@ -219,8 +217,8 @@ app.post("/deleteaccount", isLoggedIn, async (req, res) => {
 });
 
 app.post("/updateusername", isLoggedIn, async (req, res) => {
-    if (req.user.email) {
-        const user = await userModel.findOne({ email: req.user.email });
+    if (req.user.phone) {
+        const user = await userModel.findOne({ phone: req.user.phone });
         if (!user) {
             res.status(400).json({ message: "User does not exist" });
         } else {
@@ -232,7 +230,7 @@ app.post("/updateusername", isLoggedIn, async (req, res) => {
                     res.status(400).json({ message: "This username is taken, choose a different one" });
                 }
                 else {
-                    await userModel.findOneAndUpdate({ email: req.user.email }, { username: req.body.username });
+                    await userModel.findOneAndUpdate({ phone: req.user.phone }, { username: req.body.username });
                     res.status(200).json({ message: "Username updated" });
                 }
             }
@@ -243,8 +241,8 @@ app.post("/updateusername", isLoggedIn, async (req, res) => {
 });
 
 app.post("/updatename", isLoggedIn, async (req, res) => {
-    if (req.user.email) {
-        await userModel.findOneAndUpdate({ email: req.user.email }, { name: req.body.name });
+    if (req.user.phone) {
+        await userModel.findOneAndUpdate({ phone: req.user.phone }, { name: req.body.name });
         res.status(200).json({ message: "Name updated" });
     } else {
         res.redirect('/login');

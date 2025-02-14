@@ -12,7 +12,7 @@
     <div class="form-section">
         <form action="/login" method="POST">
             <h2 class="heading">Log in</h2>
-            <input required placeholder="Email" type="text" name="email">
+            <input required placeholder="Username" type="text" name="username">
             <input required placeholder="Passsword" type="password" name="password">
             <span id="errorMessage"
                 style="background-color: #0f1319; color: red; font-size: smaller; display: block;"></span>
@@ -30,10 +30,10 @@
 
             const url = "/login";
             const data = {
-                email: document.querySelector('input[name="email"]').value,
+                username: document.querySelector('input[name="username"]').value,
                 password: document.querySelector('input[name="password"]').value,
             };
-            if (data.email === "" || data.password === "") {
+            if (data.username === "" || data.password === "") {
                 submit.setAttribute("disabled");
             }
             event.preventDefault();

@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
-// mongoose.connect('mongodb://localhost:27017/users');
+mongoose.connect('mongodb://localhost:27017/users');
 
 const userSchema = mongoose.Schema({
-    email: String,
+    phone: Number,
     username: String,
-    name: String,
     password: String,
     posts: [
         {

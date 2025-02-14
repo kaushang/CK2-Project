@@ -12,9 +12,9 @@
 
 <body>
     <nav class="nav-bar">
-        <div class="nav-items user">
+        <!-- <div class="nav-items user">
             <%=user.name%>
-        </div>
+        </div> -->
         <div class="nav-items options">
             <a class="user go-back" href="/home">Home</a>
             <div class="menu-container">
@@ -34,9 +34,6 @@
             <div class="settings">
                 <a href="" class="post settings-post " id="changeUsernameBtn">
                     Change username
-                </a>
-                <a href="" class="post settings-post" id="changeNameBtn">
-                    Change name
                 </a>
                 <a href="" class="post settings-post" id="changePasswordBtn">
                     Change password
@@ -59,21 +56,6 @@
                     value="<%=user.username%>"></input>
                 <input onclick="updateUsername()" class="submit-form" type="submit" value="Change username"></input>
                 <span id="updateUsernameError"
-                    style="background-color: #0f1319; font-size: smaller; display: block;"></span>
-            </form>
-        </div>
-    </div>
-
-    <!-- Change name window -->
-    <div id="nameModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeModal4">&times;</span>
-            <h2 style="margin-bottom: 30px;">Change name</h2>
-            <form class="updateNameForm" action="/updatename" method="POST">
-                <input required style="margin-bottom: 10px;" class="" name="name"
-                    value="<%=user.name%>"></input>
-                <input onclick="updateName()" class="submit-form" type="submit" value="Change name"></input>
-                <span id="updateNameError"
                     style="background-color: #0f1319; font-size: smaller; display: block;"></span>
             </form>
         </div>
@@ -113,7 +95,7 @@
     <!-- Password changed message window -->
     <div id="passwordChanged" class="modal">
         <div class="modal-content alert1">
-            <h3 style="background-color: #0f1319; color: rgba(0, 200, 0, 0.8);">Password Changed.</h3>
+            <h3 style="background-color: #0f1319;">Password Changed.</h3>
             <div style="width: 100%; display: flex; justify-content: end; align-items: end; background-color: #0f1319;">
                 <input id="close1" class="submit-form post-submit" type="submit" value="Dismiss"></input>
             </div>
@@ -136,16 +118,6 @@
             <h3 style="background-color: #0f1319;">Username updated.</h3>
             <div style="width: 100%; display: flex; justify-content: end; align-items: end; background-color: #0f1319;">
                 <input id="close3" class="submit-form post-submit" type="submit" value="Dismiss"></input>
-            </div>
-        </div>
-    </div>
-
-    <!-- name updated message window -->
-    <div id="nameUpdated" class="modal">
-        <div class="modal-content alert4">
-            <h3 style="background-color: #0f1319;">Name updated.</h3>
-            <div style="width: 100%; display: flex; justify-content: end; align-items: end; background-color: #0f1319;">
-                <input id="close4" class="submit-form post-submit" type="submit" value="Dismiss"></input>
             </div>
         </div>
     </div>
@@ -293,46 +265,6 @@
                 errorMessage.textContent = result.message;
             }
         }
-        
-        // Change name window
-        const modal4 = document.getElementById("nameModal");
-        const changeNameBtn = document.getElementById("changeNameBtn");
-        const closeModal4 = document.getElementById("closeModal4");
-
-        changeNameBtn.addEventListener("click", (event) => {
-            event.preventDefault();
-            modal4.style.display = "block";
-        });
-
-        closeModal4.addEventListener("click", () => {
-            modal4.style.display = "none";
-        });
-
-        async function updateName() {
-            const url = "/updatename";
-            const data = {
-                name: document.querySelector('input[name="name"]').value,
-            };
-            if (data.name === "") {
-                changeNameBtn.setAttribute("disabled");
-            }
-            event.preventDefault();
-            const response = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            });
-            const result = await response.json();
-            if (response.ok) {
-                document.getElementById("nameModal").style.display = "none";
-                document.getElementById("nameUpdated").style.display = "block";
-            } else {
-                const errorMessage = document.getElementById("updateUsernameError");
-                errorMessage.style.color = "red";
-                errorMessage.textContent = "";
-                errorMessage.textContent = result.message;
-            }
-        }
 
         // Logout functionality
         const logout = document.getElementById("logout");
@@ -363,16 +295,13 @@
 
         // Close - window clicks
         window.addEventListener("click", (e) => {
-            if (e.target === modal || e.target === modal2 || e.target === modal3 || e.target
-            === modal4 || e.target === alertBox1 || e.target === alertBox2 || e.target === alertBox3 || e.target === alertBox4) {
+            if (e.target === modal || e.target === modal2 || e.target === modal3 || e.target === alertBox1 || e.target === alertBox2 || e.target === alertBox3) {
                 modal.style.display = "none";
                 modal2.style.display = "none";
                 modal3.style.display = "none";
-                modal4.style.display = "none";
                 alertBox1.style.display = "none";
                 alertBox2.style.display = "none";
                 alertBox3.style.display = "none";
-                alertBox4.style.display = "none";
             }
         });
 
@@ -386,10 +315,6 @@
         });
         document.getElementById('close3').addEventListener("click", () => {
             alertBox3.style.display = "none";
-            document.location.replace('/account');
-        });
-        document.getElementById('close4').addEventListener("click", () => {
-            alertBox4.style.display = "none";
             document.location.replace('/account');
         });
 
